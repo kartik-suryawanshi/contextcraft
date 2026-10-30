@@ -41,3 +41,10 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
         "agent_distribution": agent_distribution,
         "mock_mode": settings.MOCK_MODE,
     }
+
+
+@router.post("/seed")
+def trigger_seed_demo_data(db: Session = Depends(get_db)):
+    from backend.app.database.seed import seed_demo_data_if_empty
+    seed_demo_data_if_empty(db)
+    return {"status": "success", "message": "Demo workflow executions and memory lifecycle seeded successfully."}

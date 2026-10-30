@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   RefreshCw,
   ArrowRight,
+  Database,
 } from 'lucide-react';
 import {
   BarChart,
@@ -27,6 +28,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToEx
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [recentExecutions, setRecentExecutions] = useState<ExecutionRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seeding, setSeeding] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -41,6 +43,18 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToEx
       console.error('Failed to load dashboard metrics', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      await api.seedDemoData();
+      await loadData();
+    } catch (err) {
+      console.error('Failed to seed demo data', err);
+    } finally {
+      setSeeding(false);
     }
   };
 
@@ -73,14 +87,26 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ onNavigateToEx
             Monitor agent execution, memory lifecycle and context efficiency.
           </p>
         </div>
-        <button
-          onClick={loadData}
-          disabled={loading}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-[#E6E8EC] text-[#20242C] hover:bg-[#F8F9FB] transition shadow-xs disabled:opacity-50"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 text-[#667085] ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {(!metrics || metrics.total_executions === 0) && (
+            <button
+              onClick={handleSeed}
+              disabled={seeding}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-[#5558D9] text-white hover:bg-[#4346B8] transition shadow-xs disabled:opacity-50"
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>{seeding ? 'Seeding Data...' : 'Seed Demo Data'}</span>
+            </button>
+          )}
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md bg-white border border-[#E6E8EC] text-[#20242C] hover:bg-[#F8F9FB] transition shadow-xs disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#667085] ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* KPI Section */}

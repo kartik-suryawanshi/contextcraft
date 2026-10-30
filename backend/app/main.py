@@ -11,7 +11,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from backend.app.core.config import settings
-from backend.app.database.connection import init_db
+from backend.app.database.connection import init_db, SessionLocal
+from backend.app.database.seed import seed_demo_data_if_empty
 from backend.app.api.routes import health, executions, memories, dashboard
 
 
@@ -19,6 +20,14 @@ from backend.app.api.routes import health, executions, memories, dashboard
 async def lifespan(app: FastAPI):
     # Initialize SQLite database schema
     init_db()
+    
+    # Auto-seed initial multi-agent executions if database is empty (e.g. after ephemeral cloud restarts)
+    db = SessionLocal()
+    try:
+        seed_demo_data_if_empty(db)
+    finally:
+        db.close()
+        
     yield
 
 

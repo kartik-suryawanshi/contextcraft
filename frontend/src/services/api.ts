@@ -34,6 +34,8 @@ export const api = {
 
   getDashboardMetrics: () => fetchJson<DashboardMetrics>(`${API_BASE}/dashboard/metrics`),
 
+  seedDemoData: () => fetchJson<{ status: string; message: string }>(`${API_BASE}/dashboard/seed`, { method: 'POST' }),
+
   getExecutions: (limit = 20, offset = 0) =>
     fetchJson<ExecutionRecord[]>(`${API_BASE}/executions?limit=${limit}&offset=${offset}`),
 
